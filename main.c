@@ -799,6 +799,68 @@ void checkBalance(int index)
     waitForEnter();
 }
 
+void transferFunds(int senderIndex)
+{
+    int receiverAccNo;
+    float amount;
+    printf("\n--- Transfer Funds ---\n");
+    printf("Your current balance: %.2f\n", accounts[senderIndex].balance);
+    printf("Enter receiver's account number: ");
+    scanf("%d", &receiverAccNo);
+
+    int receiverIndex = -1;
+    for (int i = 0; i < accountCount; i++)
+    {
+        if (accounts[i].accountNumber == receiverAccNo)
+        {
+            receiverIndex = i;
+            break;
+        }
+    }
+
+    if (receiverIndex == -1)
+    {
+        printf("Error: Receiver account not found.\n");
+        waitForEnter();
+        return;
+    }
+
+    if (senderIndex == receiverIndex)
+    {
+        printf("Error: Cannot transfer funds to yourself.\n");
+        waitForEnter();
+        return;
+    }
+
+    printf("Enter amount to transfer: ");
+    scanf("%f", &amount);
+
+    if (amount <= 0)
+    {
+        printf("Error: Invalid amount.\n");
+        waitForEnter();
+        return;
+    }
+
+    if (amount > accounts[senderIndex].balance)
+    {
+        printf("Error: Insufficient balance.\n");
+        waitForEnter();
+        return;
+    }
+
+    accounts[senderIndex].balance -= amount;
+    accounts[receiverIndex].balance += amount;
+    saveAccountsToFile();
+    logTransaction(accounts[senderIndex].accountNumber, "Transfer Out", amount);
+    logTransaction(accounts[receiverIndex].accountNumber, "Transfer In", amount);
+
+    printf("Funds transferred successfully!\n");
+    printf("Your new balance: %.2f\n", accounts[senderIndex].balance);
+    printf("Receiver's new balance: %.2f\n", accounts[receiverIndex].balance);
+    waitForEnter();
+}
+
 // Function to update account details
 void updateDetails(int index)
 {
@@ -914,6 +976,7 @@ void loanSection(int index)
     printf("Current Loan: %.2f\n", accounts[index].loanAmount);
     printf("1. Apply for Loan\n2. Repay Loan\n3. Back\n");
     int choice;
+    printf("Enter your choice: ");
     scanf("%d", &choice);
 
     if (choice == 1)
@@ -996,11 +1059,12 @@ void loggedInMenu(int index)
         printf("1. Deposit Money\n");
         printf("2. Withdraw Money\n");
         printf("3. Check Balance\n");
-        printf("4. Update Details\n");
-        printf("5. View Transaction History\n");
-        printf("6. Loan Management\n");
-        printf("7. Close Account\n");
-        printf("8. Logout\n");
+        printf("4. Fund Transfer\n");
+        printf("5. Update Details\n");
+        printf("6. View Transaction History\n");
+        printf("7. Loan Management\n");
+        printf("8. Close Account\n");
+        printf("9. Logout\n");
         printf("Choose an option: ");
         scanf("%d", &choice);
 
@@ -1016,18 +1080,21 @@ void loggedInMenu(int index)
             checkBalance(index);
             break;
         case 4:
-            updateDetails(index);
+            transferFunds(index);
             break;
         case 5:
-            viewHistory(index);
+            updateDetails(index);
             break;
         case 6:
-            loanSection(index);
+            viewHistory(index);
             break;
         case 7:
+            loanSection(index);
+            break;
+        case 8:
             closeAccount(index);
             return;
-        case 8:
+        case 9:
             printf("Logging out...\n");
             waitForEnter();
             break;
@@ -1035,7 +1102,7 @@ void loggedInMenu(int index)
             printf("Invalid option.\n");
             waitForEnter();
         }
-    } while (choice != 8);
+    } while (choice != 9);
 }
 
 // Function to handle admin login
