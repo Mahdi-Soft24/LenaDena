@@ -229,42 +229,95 @@ void logLoginAttempt(int accNo, const char *status)
 // Function to save accounts to file
 void saveAccountsToFile()
 {
-    FILE *fp = fopen("accounts.dat", "wb");
+    FILE *fp = fopen("accounts.txt", "w");
     if (fp == NULL)
     {
         printf("Error: Cannot open accounts file for writing.\n");
         return;
     }
-    fwrite(&accountCount, sizeof(int), 1, fp);
-    fwrite(accounts, sizeof(Account), accountCount, fp);
-    fwrite(&INTEREST_RATE, sizeof(float), 1, fp);
-    fwrite(&rateHistoryCount, sizeof(int), 1, fp);
-    fwrite(rateHistory, sizeof(InterestRateHistory), rateHistoryCount, fp);
+
+    // Save number of accounts
+    fprintf(fp, "%d\n", accountCount);
+
+    // Save account details
+    for (int i = 0; i < accountCount; i++)
+    {
+        fprintf(fp,
+                "%d|%s|%s|%s|%.2f|%.2f|%.2f|%s|%ld|%d|%ld\n",
+                accounts[i].accountNumber,
+                accounts[i].name,
+                accounts[i].address,
+                accounts[i].phone,
+                accounts[i].balance,
+                accounts[i].loanAmount,
+                accounts[i].interest,
+                accounts[i].password,
+                (long)accounts[i].creationDate,
+                accounts[i].loginAttempts,
+                (long)accounts[i].lastLogin);
+    }
+
+    // Save interest rate
+    fprintf(fp, "%.4f\n", INTEREST_RATE);
+
+    // Save interest rate history count
+    fprintf(fp, "%d\n", rateHistoryCount);
+
+    // Save each history record
+    for (int i = 0; i < rateHistoryCount; i++)
+    {
+        fprintf(fp, "%.4f|%ld\n", rateHistory[i].rate, (long)rateHistory[i].timestamp);
+    }
+
     fclose(fp);
 }
 
 // Function to load accounts from file
 void loadAccountsFromFile()
 {
-    FILE *fp = fopen("accounts.dat", "rb");
-    if (fp != NULL)
+    FILE *fp = fopen("accounts.txt", "r");
+    if (fp == NULL)
     {
-        fread(&accountCount, sizeof(int), 1, fp);
-        if (accountCount > MAX_ACCOUNTS)
-        {
-            printf("Error: Account count exceeds maximum limit.\n");
-            accountCount = 0;
-            fclose(fp);
-            return;
-        }
-        fread(accounts, sizeof(Account), accountCount, fp);
-        fread(&INTEREST_RATE, sizeof(float), 1, fp);
-        fread(&rateHistoryCount, sizeof(int), 1, fp);
-        if (rateHistoryCount > 100)
-            rateHistoryCount = 0;
-        fread(rateHistory, sizeof(InterestRateHistory), rateHistoryCount, fp);
-        fclose(fp);
+        printf("No saved accounts file found.\n");
+        return;
     }
+
+    fscanf(fp, "%d\n", &accountCount);
+    if (accountCount > MAX_ACCOUNTS)
+    {
+        printf("Error: Account count exceeds limit.\n");
+        accountCount = 0;
+        fclose(fp);
+        return;
+    }
+
+    for (int i = 0; i < accountCount; i++)
+    {
+        fscanf(fp, "%d|%49[^|]|%99[^|]|%14[^|]|%f|%f|%f|%19[^|]|%ld|%d|%ld\n",
+               &accounts[i].accountNumber,
+               accounts[i].name,
+               accounts[i].address,
+               accounts[i].phone,
+               &accounts[i].balance,
+               &accounts[i].loanAmount,
+               &accounts[i].interest,
+               accounts[i].password,
+               (long *)&accounts[i].creationDate,
+               &accounts[i].loginAttempts,
+               (long *)&accounts[i].lastLogin);
+    }
+
+    fscanf(fp, "%f\n", &INTEREST_RATE);
+    fscanf(fp, "%d\n", &rateHistoryCount);
+    if (rateHistoryCount > 100)
+        rateHistoryCount = 0;
+
+    for (int i = 0; i < rateHistoryCount; i++)
+    {
+        fscanf(fp, "%f|%ld\n", &rateHistory[i].rate, (long *)&rateHistory[i].timestamp);
+    }
+
+    fclose(fp);
 }
 
 // Function to log a transaction
