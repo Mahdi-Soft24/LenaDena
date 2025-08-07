@@ -1113,7 +1113,7 @@ void loggedInMenu(int index)
         printf("2. Withdraw Money\n");
         printf("3. Check Balance\n");
         printf("4. Fund Transfer\n");
-        printf("5. Update Details\n");
+        printf("5. Update Profile\n");
         printf("6. View Transaction History\n");
         printf("7. Loan Management\n");
         printf("8. Close Account\n");
