@@ -1319,7 +1319,7 @@ void mainMenu()
     int choice;
     do
     {
-        printf("\n=== Bank Account Management System ===\n");
+        printf("\n=== LenaDena: Banking Transaction Management System ===\n");
         printf("1. Create New Account\n");
         printf("2. Login to Account\n");
         printf("3. Admin Login\n");
@@ -1365,7 +1365,7 @@ void mainMenu()
 // Main function
 int main()
 {
-    printf("Initializing Bank Account Management System...\n");
+    //printf("Initializing Bank Account Management System...\n");
     loadAccountsFromFile();
     mainMenu();
     printf("System shutdown complete.\n");
