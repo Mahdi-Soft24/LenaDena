@@ -1362,7 +1362,6 @@ void mainMenu()
         }
     } while (choice != 5);
 }
-
 // Main function
 int main()
 {
