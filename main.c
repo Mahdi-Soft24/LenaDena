@@ -4,6 +4,9 @@
 #include <ctype.h>
 #include <time.h>
 
+void saveAccountsToFile();
+int authenticate(int accNo, const char *password);
+
 #define MAX_ACCOUNTS 1000
 #define MAX_TRANSACTIONS 10000
 #define MIN_PASSWORD_LEN 8
