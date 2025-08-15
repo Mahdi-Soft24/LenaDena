@@ -4,8 +4,6 @@
 #include <ctype.h>
 #include <time.h>
 
-void saveAccountsToFile();
-int authenticate(int accNo, const char *password);
 
 #define MAX_ACCOUNTS 1000
 #define MAX_TRANSACTIONS 10000
@@ -17,6 +15,47 @@ int authenticate(int accNo, const char *password);
 #define MAX_LOAN_AMOUNT 100000.0
 #define LOAN_INTEREST_RATE 0.05f
 #define MAX_LOGIN_ATTEMPTS 3
+
+
+void clearInputBuffer();
+int isValidString(const char *str, int maxLen);
+int isValidPhone(const char *phone);
+int isStrongPassword(const char *password);
+int generateAccountNumber();
+void waitForEnter();
+char *getTimeString(time_t timestamp);
+int parseDate(const char *dateStr, struct tm *tm);
+int authenticate(int accNo, const char *password);
+void logLoginAttempt(int accNo, const char *status);
+void saveAccountsToFile();
+void loadAccountsFromFile();
+void logTransaction(int accNo, const char *type, float amount);
+void filterTransactionsByDate(int accNo, time_t start, time_t end);
+void filterTransactionsByType(int accNo, const char *type);
+void showTransactionSummary(int accNo);
+void showTransactionHistory(int accNo);
+void createAccount();
+void recoverPassword();
+int login();
+void depositMoney(int index);
+void withdrawMoney(int index);
+void checkBalance(int index);
+void transferFunds(int senderIndex);
+void updateDetails(int index);
+void applyInterest();
+void setInterestRate();
+void viewInterestRateHistory();
+void loanSection(int index);
+void closeAccount(int index);
+void viewHistory(int index);
+void loggedInMenu(int index);
+int adminLogin();
+void showAllAccounts();
+void removeAccountByAdmin();
+void viewLoginHistory();
+void adminMenu();
+void mainMenu();
+int main();
 
 // Global interest rate variable (initially set to 3%)
 float INTEREST_RATE = 0.03f;
@@ -240,7 +279,7 @@ void saveAccountsToFile()
     }
 
     // Save number of accounts
-    fprintf(fp, "%d\n", accountCount);
+    fprintf(fp, "Total Accounts: %d\n", accountCount);
 
     // Save account details
     for (int i = 0; i < accountCount; i++)
@@ -472,8 +511,8 @@ void showTransactionSummary(int accNo)
         waitForEnter();
         return;
     }
-    float totalDeposits = 0, totalWithdrawals = 0, totalInterest = 0, totalLoans = 0, totalRepayments = 0;
-    int depositCount = 0, withdrawalCount = 0, interestCount = 0, loanCount = 0, repaymentCount = 0;
+    float totalDeposits = 0, totalWithdrawals = 0, totalTransferIn = 0, totalTransferOut = 0, totalInterest = 0, totalLoans = 0, totalRepayments = 0;
+    int depositCount = 0, withdrawalCount = 0, transferInCount = 0,transferOutCount = 0, interestCount = 0, loanCount = 0, repaymentCount = 0;
     char line[200];
     char accStr[20];
     sprintf(accStr, "Acc#%d", accNo);
@@ -494,6 +533,16 @@ void showTransactionSummary(int accNo)
                 totalWithdrawals += amount;
                 withdrawalCount++;
             }
+            else if (strstr(line, "Transfer In"))
+            {
+                totalTransferIn += amount;
+                transferInCount++;
+            }
+            else if (strstr(line, "Transfer Out"))
+            {
+                totalTransferOut += amount;
+                transferOutCount++;
+            }
             else if (strstr(line, "Interest Applied"))
             {
                 totalInterest += amount;
@@ -513,11 +562,13 @@ void showTransactionSummary(int accNo)
     }
 
     printf("\n--- Transaction Summary for Acc#%d ---\n", accNo);
-    printf("Total Deposits    : %.2f (%d transactions)\n", totalDeposits, depositCount);
-    printf("Total Withdrawals : %.2f (%d transactions)\n", totalWithdrawals, withdrawalCount);
-    printf("Total Interest    : %.2f (%d applications)\n", totalInterest, interestCount);
-    printf("Total Loans Taken : %.2f (%d loans)\n", totalLoans, loanCount);
-    printf("Total Repayments  : %.2f (%d repayments)\n", totalRepayments, repaymentCount);
+    printf("Total Deposits     : %.2f (%d transactions)\n", totalDeposits, depositCount);
+    printf("Total Withdrawals  : %.2f (%d transactions)\n", totalWithdrawals, withdrawalCount);
+    printf("Total Transfer In  : %.2f (%d transfers)\n", totalTransferIn, transferInCount);
+    printf("Total Transfer Out : %.2f (%d transfers)\n", totalTransferOut, transferOutCount);
+    printf("Total Interest     : %.2f (%d applications)\n", totalInterest, interestCount);
+    printf("Total Loans Taken  : %.2f (%d loans)\n", totalLoans, loanCount);
+    printf("Total Repayments   : %.2f (%d repayments)\n", totalRepayments, repaymentCount);
     fclose(fp);
     waitForEnter();
 }
@@ -913,7 +964,7 @@ void transferFunds(int senderIndex)
 
     printf("Funds transferred successfully!\n");
     printf("Your new balance: %.2f\n", accounts[senderIndex].balance);
-    printf("Receiver's new balance: %.2f\n", accounts[receiverIndex].balance);
+    
     waitForEnter();
 }
 
@@ -1322,7 +1373,8 @@ void mainMenu()
     int choice;
     do
     {
-        printf("\n=== Bank Account Management System ===\n");
+        printf("\n=== Lenadena: Banking Transaction Management System ===\n");
+        printf("\t\t<<< With Trust & Fast >>>\n\n");
         printf("1. Create New Account\n");
         printf("2. Login to Account\n");
         printf("3. Admin Login\n");
@@ -1367,7 +1419,6 @@ void mainMenu()
 // Main function
 int main()
 {
-    printf("Initializing Bank Account Management System...\n");
     loadAccountsFromFile();
     mainMenu();
     printf("System shutdown complete.\n");
